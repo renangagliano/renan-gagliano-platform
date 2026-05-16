@@ -4,6 +4,7 @@ import Footer from "./components/Footer.jsx";
 import Header from "./components/Header.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import About from "./pages/About.jsx";
+import ArticleDetail from "./pages/ArticleDetail.jsx";
 import Articles from "./pages/Articles.jsx";
 import Contact from "./pages/Contact.jsx";
 import Experience from "./pages/Experience.jsx";
@@ -18,6 +19,7 @@ const routes = [
   { path: "/projects", element: <Projects /> },
   { path: "/public-proposals", element: <Proposals /> },
   { path: "/articles", element: <Articles /> },
+  { path: "/articles/:slug", element: <ArticleDetail /> },
   { path: "/contact", element: <Contact /> },
 ];
 
