@@ -1,0 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+::selection {
+  background: rgba(19, 181, 166, 0.28);
+}
+
+.focus-ring {
+  @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-civic;
+}
+
+.container-pad {
+  @apply mx-auto w-full max-w-7xl px-5 sm:px-6 lg:px-8;
+}
+
+.section-pad {
+  @apply py-16 sm:py-20 lg:py-24;
+}
+
+.executive-card {
+  @apply rounded-lg border border-ink/10 bg-white/[0.78] shadow-executive backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-white/[0.06];
+}
+
+.muted {
+  @apply text-ink/[0.68] dark:text-porcelain/[0.68];
+}
+
+.eyebrow {
+  @apply text-xs font-bold uppercase tracking-[0.22em] text-civic;
+}
+
+.text-balance {
+  text-wrap: balance;
+}

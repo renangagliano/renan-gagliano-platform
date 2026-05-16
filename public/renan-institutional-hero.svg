@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 820" role="img" aria-labelledby="title desc">
+  <title id="title">Institutional technology architecture</title>
+  <desc id="desc">Abstract executive technology environment with governance grid, data paths, and civic infrastructure.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071014"/>
+      <stop offset=".48" stop-color="#10212a"/>
+      <stop offset="1" stop-color="#0f3d42"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f6f8f7" stop-opacity=".24"/>
+      <stop offset="1" stop-color="#13b5a6" stop-opacity=".08"/>
+    </linearGradient>
+    <radialGradient id="signal" cx=".68" cy=".35" r=".5">
+      <stop offset="0" stop-color="#13b5a6" stop-opacity=".52"/>
+      <stop offset=".55" stop-color="#13b5a6" stop-opacity=".1"/>
+      <stop offset="1" stop-color="#13b5a6" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="softGlow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="10" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="1440" height="820" fill="url(#sky)"/>
+  <rect width="1440" height="820" fill="url(#signal)"/>
+  <g opacity=".16" stroke="#f6f8f7" stroke-width="1">
+    <path d="M0 120h1440M0 240h1440M0 360h1440M0 480h1440M0 600h1440M0 720h1440"/>
+    <path d="M120 0v820M240 0v820M360 0v820M480 0v820M600 0v820M720 0v820M840 0v820M960 0v820M1080 0v820M1200 0v820M1320 0v820"/>
+  </g>
+  <g transform="translate(620 120)">
+    <path d="M20 410 230 80l370 120-210 330z" fill="url(#panel)" stroke="#f6f8f7" stroke-opacity=".28"/>
+    <path d="M132 454 340 130l372 118-210 330z" fill="url(#panel)" stroke="#13b5a6" stroke-opacity=".44"/>
+    <path d="M248 488 454 168l318 102-206 318z" fill="url(#panel)" stroke="#d6aa5b" stroke-opacity=".48"/>
+  </g>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#softGlow)">
+    <path d="M760 540c90-180 205-260 345-240 95 14 162-18 204-94" stroke="#13b5a6" stroke-width="3" opacity=".9"/>
+    <path d="M690 448c80-92 160-125 240-98 106 36 204 8 294-84" stroke="#d6aa5b" stroke-width="2" opacity=".72"/>
+    <path d="M840 630c72-96 154-142 245-136 94 6 173-28 238-104" stroke="#f6f8f7" stroke-width="2" opacity=".5"/>
+  </g>
+  <g fill="#13b5a6" opacity=".95">
+    <circle cx="760" cy="540" r="7"/>
+    <circle cx="1105" cy="300" r="8"/>
+    <circle cx="1309" cy="206" r="6"/>
+    <circle cx="690" cy="448" r="6"/>
+    <circle cx="1224" cy="266" r="7"/>
+    <circle cx="840" cy="630" r="6"/>
+  </g>
+  <g transform="translate(110 150)" opacity=".92">
+    <rect width="360" height="78" rx="10" fill="#f6f8f7" opacity=".1" stroke="#f6f8f7" stroke-opacity=".18"/>
+    <rect y="104" width="260" height="16" rx="8" fill="#13b5a6" opacity=".72"/>
+    <rect y="138" width="320" height="12" rx="6" fill="#f6f8f7" opacity=".28"/>
+    <rect y="168" width="210" height="12" rx="6" fill="#f6f8f7" opacity=".18"/>
+  </g>
+</svg>
