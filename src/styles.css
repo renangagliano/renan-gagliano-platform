@@ -5,7 +5,7 @@
 @tailwind utilities;
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 .dark {
@@ -19,6 +19,11 @@ html {
 body {
   margin: 0;
   min-width: 320px;
+  background: #f6f8f7;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+.dark body {
   background: #071014;
 }
 
@@ -39,11 +44,11 @@ body {
 }
 
 .executive-card {
-  @apply rounded-lg border border-white/10 bg-white/[0.07] shadow-executive backdrop-blur-xl transition-colors;
+  @apply rounded-lg border border-ink/10 bg-white/80 shadow-executive backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-white/[0.07];
 }
 
 .muted {
-  @apply text-porcelain/[0.68];
+  @apply text-ink/[0.68] dark:text-porcelain/[0.68];
 }
 
 .eyebrow {
@@ -51,9 +56,54 @@ body {
 }
 
 .glass-band {
-  @apply border-y border-white/10 bg-white/[0.04] backdrop-blur-2xl;
+  @apply border-y border-ink/10 bg-white/70 backdrop-blur-2xl dark:border-white/10 dark:bg-white/[0.04];
 }
 
 .text-balance {
   text-wrap: balance;
+}
+
+html:not(.dark) .bg-graphite\/82 {
+  background-color: rgb(246 248 247 / 0.88);
+}
+
+html:not(.dark) .bg-graphite,
+html:not(.dark) .bg-graphite\/70,
+html:not(.dark) .bg-graphite\/88 {
+  background-color: rgb(246 248 247 / 0.92);
+}
+
+html:not(.dark) .text-white,
+html:not(.dark) .text-white\/70,
+html:not(.dark) .text-white\/72,
+html:not(.dark) .text-white\/74,
+html:not(.dark) .text-white\/76,
+html:not(.dark) .text-white\/80,
+html:not(.dark) .text-white\/82,
+html:not(.dark) .text-white\/86 {
+  color: rgb(16 24 32 / var(--tw-text-opacity, 1));
+}
+
+html:not(.dark) .text-porcelain,
+html:not(.dark) .text-porcelain\/\[0\.68\] {
+  color: rgb(16 24 32 / var(--tw-text-opacity, 1));
+}
+
+html:not(.dark) .border-white\/10,
+html:not(.dark) .border-white\/12,
+html:not(.dark) .border-white\/\[0\.18\] {
+  border-color: rgb(16 24 32 / 0.12);
+}
+
+html:not(.dark) .bg-white\/\[0\.03\],
+html:not(.dark) .bg-white\/\[0\.04\],
+html:not(.dark) .bg-white\/\[0\.05\],
+html:not(.dark) .bg-white\/\[0\.06\],
+html:not(.dark) .bg-white\/\[0\.07\],
+html:not(.dark) .bg-white\/\[0\.08\] {
+  background-color: rgb(255 255 255 / 0.76);
+}
+
+html:not(.dark) .hover\:bg-white\/8:hover {
+  background-color: rgb(16 24 32 / 0.06);
 }
