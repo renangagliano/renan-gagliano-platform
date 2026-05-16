@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -26,6 +26,12 @@
     <title>Renan Gagliano | Plataforma Institucional de Tecnologia</title>
   </head>
   <body>
+    <script>
+      (() => {
+        const theme = localStorage.getItem("theme") || "dark";
+        document.documentElement.classList.toggle("dark", theme !== "light");
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

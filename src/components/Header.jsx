@@ -4,15 +4,19 @@ import { Link, NavLink } from "react-router-dom";
 import { languages, navOrder } from "../data/site.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
+const getStoredTheme = () => localStorage.getItem("theme") || "dark";
+
 export default function Header() {
   const { language, setLanguage, t } = useLanguage();
   const [open, setOpen] = useState(false);
-  const [dark, setDark] = useState(() => localStorage.theme !== "light");
+  const [theme, setTheme] = useState(getStoredTheme);
+  const isDark = theme === "dark";
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-    localStorage.theme = dark ? "dark" : "light";
-  }, [dark]);
+    document.documentElement.classList.toggle("dark", isDark);
+    document.documentElement.style.colorScheme = theme;
+    localStorage.setItem("theme", theme);
+  }, [isDark, theme]);
 
   const navItems = navOrder.map(([key, path]) => ({ key, path, label: t.nav[key] }));
 
@@ -71,11 +75,11 @@ export default function Header() {
           </div>
           <button
             type="button"
-            onClick={() => setDark((value) => !value)}
+            onClick={() => setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"))}
             className="focus-ring grid size-11 place-items-center rounded-md border border-white/10 bg-white/[0.06] text-white transition hover:border-civic"
             aria-label={t.common.dark}
           >
-            {dark ? <Sun size={19} /> : <Moon size={19} />}
+            {isDark ? <Moon size={19} /> : <Sun size={19} />}
           </button>
           <button
             type="button"
