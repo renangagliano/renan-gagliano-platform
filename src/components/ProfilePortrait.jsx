@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import PublicImage from "./PublicImage.jsx";
 
 export default function ProfilePortrait({ compact = false }) {
   return (
@@ -10,8 +11,8 @@ export default function ProfilePortrait({ compact = false }) {
     >
       <div className="absolute -inset-4 rounded-[2rem] bg-civic/20 blur-3xl" />
       <div className="relative overflow-hidden rounded-2xl border border-white/12 bg-white/[0.06] p-3 shadow-executive">
-        <img
-          src="/renan-gagliano-platform/renan-profile.jpg"
+        <PublicImage
+          src="/renan-profile.jpg"
           alt="Renan Gagliano"
           className="aspect-[4/5] w-full rounded-xl object-cover object-center"
           loading={compact ? "lazy" : "eager"}
