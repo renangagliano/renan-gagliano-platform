@@ -1,9 +1,9 @@
 {
-  "name": "renan-gagliano-institutional-platform",
+  "name": "renan-gagliano-platform",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://renangagliano.github.io/renan-gagliano-institutional-platform/",
+  "homepage": "https://renangagliano.github.io/renan-gagliano-platform/",
   "scripts": {
     "dev": "vite --configLoader runner --host 127.0.0.1",
     "build": "vite build --configLoader runner && node scripts/gh-pages-404.js",

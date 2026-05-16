@@ -25,7 +25,7 @@ export default function App() {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-porcelain text-ink antialiased transition-colors duration-300 dark:bg-graphite dark:text-porcelain">
+    <div className="min-h-screen bg-graphite text-porcelain antialiased transition-colors duration-300">
       <ScrollToTop />
       <Header />
       <main id="main-content">

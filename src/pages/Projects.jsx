@@ -3,29 +3,31 @@ import IconBadge from "../components/IconBadge.jsx";
 import PageTransition from "../components/PageTransition.jsx";
 import SectionHeader from "../components/SectionHeader.jsx";
 import Seo from "../components/Seo.jsx";
-import { projects } from "../data/site.js";
+import { useLanguage } from "../i18n/LanguageContext.jsx";
 
 export default function Projects() {
+  const { t } = useLanguage();
+
   return (
     <PageTransition>
-      <Seo title="Projects" description="Strategic technology and governance projects by Renan Gagliano." />
+      <Seo title={`${t.nav.projects} | Renan Gagliano`} description={t.projects.title} />
       <section className="section-pad">
         <div className="container-pad">
-          <SectionHeader
-            eyebrow="Projects"
-            title="Modern project architecture for technology, governance, and public value."
-            description="Each project area is designed as a portfolio-ready module with clear category framing, delivery logic, and executive communication."
-          />
-          <div className="mt-12 grid gap-5 lg:grid-cols-3">
-            {projects.map((project) => (
+          <SectionHeader eyebrow={t.projects.eyebrow} title={t.projects.title} description={t.identity.summary} />
+          <div className="mt-12 grid gap-5 lg:grid-cols-2">
+            {t.projects.items.map((project) => (
               <Card key={project.title}>
-                <IconBadge icon={project.icon} />
-                <p className="mt-5 text-sm font-bold uppercase tracking-[0.16em] text-signal">{project.category}</p>
-                <h2 className="mt-3 font-display text-2xl font-extrabold">{project.title}</h2>
+                <div className="flex items-start justify-between gap-5">
+                  <IconBadge icon={project.icon} />
+                  <p className="rounded-md border border-signal/20 bg-signal/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-signal">
+                    {project.category}
+                  </p>
+                </div>
+                <h2 className="mt-6 font-display text-2xl font-extrabold text-white">{project.title}</h2>
                 <p className="mt-4 leading-7 muted">{project.description}</p>
                 <div className="mt-6 flex flex-wrap gap-2">
                   {project.tags.map((tag) => (
-                    <span key={tag} className="rounded-md border border-ink/10 px-3 py-1 text-xs font-bold dark:border-white/10">
+                    <span key={tag} className="rounded-md border border-white/10 px-3 py-1 text-xs font-bold text-white/72">
                       {tag}
                     </span>
                   ))}
