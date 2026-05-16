@@ -5,6 +5,7 @@ import Card from "../components/Card.jsx";
 import IconBadge from "../components/IconBadge.jsx";
 import PageTransition from "../components/PageTransition.jsx";
 import ProfilePortrait from "../components/ProfilePortrait.jsx";
+import PublicImage from "../components/PublicImage.jsx";
 import Seo from "../components/Seo.jsx";
 import { themeSignals } from "../data/site.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
@@ -105,8 +106,9 @@ export default function Home() {
             </div>
           </div>
           <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-6 shadow-executive">
-            <img
+            <PublicImage
               src="/renan-institutional-hero.svg"
+              fallbackSrc="/renan-profile.jpg"
               alt=""
               className="aspect-[16/10] w-full rounded-xl object-cover opacity-90"
               loading="lazy"
