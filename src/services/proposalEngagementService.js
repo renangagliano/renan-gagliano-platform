@@ -1,31 +1,62 @@
-import { hasSupabaseConfig, supabase } from "../lib/supabaseClient.js";
+import { hasSupabaseConfig, supabase } from "../lib/supabase.js";
+
+const votesTable = "public_proposal_votes";
+const suggestionsTable = "public_proposal_suggestions";
+const voterIdKey = "renan-public-proposal-voter-id";
+const localVotesKey = "renan-public-proposal-user-votes";
 
 const emptyTotals = (proposalIds) =>
   proposalIds.reduce((totals, proposalId) => ({ ...totals, [proposalId]: { likes: 0, dislikes: 0 } }), {});
 
-const toStoredVoteType = (voteType) => (voteType === "likes" ? "like" : voteType === "dislikes" ? "dislike" : voteType);
 const toCounterKey = (voteType) => (voteType === "like" ? "likes" : voteType === "dislike" ? "dislikes" : null);
+const getProposalIds = (proposals) => proposals.map((proposal) => proposal.id);
 
-// Required Supabase RLS outline:
-// - Enable RLS on public.proposal_votes and public.proposal_suggestions.
-// - Allow anon SELECT on proposal_votes so public counters can be read.
-// - Allow anon INSERT on proposal_votes only for proposal_id, vote_type, voter_id and vote_type in ('like', 'dislike').
-// - Add a unique index on proposal_votes(proposal_id, voter_id) to enforce one vote per browser/device id.
-// - Allow anon INSERT on proposal_suggestions for proposal_id, name, email and suggestion; do not expose UPDATE/DELETE.
-// - Never expose a service role key in Vite; this client uses only the public anon key.
+const getStoredJson = (key, fallback) => {
+  try {
+    return JSON.parse(localStorage.getItem(key)) || fallback;
+  } catch {
+    return fallback;
+  }
+};
 
-export async function fetchProposalVoteTotals(proposalIds) {
+const setStoredJson = (key, value) => {
+  localStorage.setItem(key, JSON.stringify(value));
+};
+
+export function getVoterId() {
+  const storedVoterId = localStorage.getItem(voterIdKey);
+  if (storedVoterId) return storedVoterId;
+
+  const voterId = crypto.randomUUID ? crypto.randomUUID() : `voter-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(voterIdKey, voterId);
+  return voterId;
+}
+
+export function hasLocalVote(proposalId) {
+  return Boolean(getStoredJson(localVotesKey, {})[proposalId]);
+}
+
+function setLocalVote(proposalId, voteType) {
+  const votes = getStoredJson(localVotesKey, {});
+  setStoredJson(localVotesKey, { ...votes, [proposalId]: voteType });
+}
+
+export function getLocalVotes() {
+  return getStoredJson(localVotesKey, {});
+}
+
+export async function getProposalTotals(proposalIds) {
   const totals = emptyTotals(proposalIds);
 
   if (!hasSupabaseConfig) {
-    return { available: false, totals };
+    return { status: "configuration", totals };
   }
 
-  const { data, error } = await supabase.from("proposal_votes").select("proposal_id, vote_type").in("proposal_id", proposalIds);
+  const { data, error } = await supabase.from(votesTable).select("proposal_id, vote_type").in("proposal_id", proposalIds);
 
   if (error) {
-    console.info("Unable to load proposal vote totals from Supabase.", error.message);
-    return { available: false, totals };
+    console.info("Unable to load public proposal vote totals from Supabase.", error.message);
+    return { status: "error", totals };
   }
 
   data.forEach((vote) => {
@@ -35,67 +66,101 @@ export async function fetchProposalVoteTotals(proposalIds) {
     }
   });
 
-  return { available: true, totals };
+  return { status: "ready", totals };
 }
 
-export async function hasVotedForProposal(proposalId, voterId) {
-  if (!hasSupabaseConfig) return { available: false, hasVoted: false };
+export async function getDashboardSummary(proposals) {
+  const result = await getProposalTotals(getProposalIds(proposals));
+  const totals = result.totals;
+  const aggregate = proposals.reduce(
+    (current, proposal) => {
+      const counts = totals[proposal.id] || { likes: 0, dislikes: 0 };
+      return { likes: current.likes + counts.likes, dislikes: current.dislikes + counts.dislikes };
+    },
+    { likes: 0, dislikes: 0 },
+  );
 
-  const { data, error } = await supabase
-    .from("proposal_votes")
+  const mostSupported = proposals.reduce((selected, proposal) => {
+    const selectedLikes = totals[selected.id]?.likes || 0;
+    const proposalLikes = totals[proposal.id]?.likes || 0;
+    return proposalLikes > selectedLikes ? proposal : selected;
+  }, proposals[0]);
+
+  return {
+    ...result,
+    totalLikes: aggregate.likes,
+    totalDislikes: aggregate.dislikes,
+    mostSupported: aggregate.likes + aggregate.dislikes > 0 ? mostSupported : null,
+  };
+}
+
+export async function voteProposal(proposalId, voteType) {
+  if (hasLocalVote(proposalId)) {
+    return { status: "already-voted" };
+  }
+
+  if (!hasSupabaseConfig) {
+    return { status: "configuration" };
+  }
+
+  const voterId = getVoterId();
+  const { data: existingVote, error: lookupError } = await supabase
+    .from(votesTable)
     .select("id, vote_type")
     .eq("proposal_id", proposalId)
     .eq("voter_id", voterId)
     .maybeSingle();
 
-  if (error) {
-    console.info("Unable to verify existing proposal vote in Supabase.", error.message);
-    return { available: false, hasVoted: false };
+  if (lookupError) {
+    console.info("Unable to verify existing public proposal vote in Supabase.", lookupError.message);
+    return { status: "error" };
   }
 
-  return { available: true, hasVoted: Boolean(data), voteType: data?.vote_type || null };
-}
-
-export async function submitProposalVote({ proposalId, voteType, voterId }) {
-  if (!hasSupabaseConfig) return { available: false, inserted: false, alreadyVoted: false };
-
-  const existingVote = await hasVotedForProposal(proposalId, voterId);
-  if (existingVote.hasVoted) {
-    return { available: true, inserted: false, alreadyVoted: true, voteType: existingVote.voteType };
+  if (existingVote) {
+    setLocalVote(proposalId, existingVote.vote_type);
+    return { status: "already-voted", voteType: existingVote.vote_type };
   }
 
-  const { error } = await supabase.from("proposal_votes").insert({
+  const { error } = await supabase.from(votesTable).insert({
     proposal_id: proposalId,
-    vote_type: toStoredVoteType(voteType),
+    vote_type: voteType,
     voter_id: voterId,
   });
 
   if (error) {
     if (error.code === "23505") {
-      return { available: true, inserted: false, alreadyVoted: true };
+      setLocalVote(proposalId, voteType);
+      return { status: "already-voted", voteType };
     }
 
-    console.info("Unable to submit proposal vote to Supabase.", error.message);
-    return { available: false, inserted: false, alreadyVoted: false };
+    console.info("Unable to submit public proposal vote to Supabase.", error.message);
+    return { status: "error" };
   }
 
-  return { available: true, inserted: true, alreadyVoted: false };
+  setLocalVote(proposalId, voteType);
+  return { status: "success", voteType };
 }
 
-export async function submitProposalSuggestion({ proposalId, name, email, suggestion }) {
-  if (!hasSupabaseConfig) return { available: false, inserted: false };
+export async function submitSuggestion(proposalId, formData) {
+  if (!hasSupabaseConfig) {
+    return { status: "configuration" };
+  }
 
-  const { error } = await supabase.from("proposal_suggestions").insert({
+  const { error } = await supabase.from(suggestionsTable).insert({
     proposal_id: proposalId,
-    name,
-    email,
-    suggestion,
+    name: formData.name,
+    email: formData.email,
+    suggestion: formData.suggestion,
   });
 
   if (error) {
-    console.info("Unable to submit proposal suggestion to Supabase.", error.message);
-    return { available: false, inserted: false };
+    console.info("Unable to submit public proposal suggestion to Supabase.", error.message);
+    return { status: "error" };
   }
 
-  return { available: true, inserted: true };
+  return { status: "success" };
 }
+
+export const fetchProposalVoteTotals = getProposalTotals;
+export const submitProposalVote = ({ proposalId, voteType }) => voteProposal(proposalId, voteType);
+export const submitProposalSuggestion = ({ proposalId, ...formData }) => submitSuggestion(proposalId, formData);
