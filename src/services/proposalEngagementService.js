@@ -24,10 +24,9 @@ const setStoredJson = (key, value) => {
 };
 
 const formatSupabaseError = (error) => ({
+  status: error?.status || null,
   message: error?.message || "Unknown Supabase error",
   code: error?.code || null,
-  details: error?.details || null,
-  hint: error?.hint || null,
 });
 
 const hasReadySupabaseClient = () => Boolean(hasSupabaseConfig && supabase);
@@ -37,7 +36,7 @@ async function testVotesTableSelect() {
     return { error: { message: "Supabase client is not configured." } };
   }
 
-  const { error } = await supabase.from(votesTable).select("id", { count: "exact", head: true }).limit(1);
+  const { error } = await supabase.from(votesTable).select("id").limit(1);
 
   if (error) {
     console.info("Supabase public proposal votes select failed.", formatSupabaseError(error));
