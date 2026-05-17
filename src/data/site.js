@@ -77,6 +77,7 @@ export const content = {
       title: "Liderança em tecnologia, governança e modernização digital.",
       summary:
         "Plataforma institucional para apresentar uma trajetória executiva em operações de TIC, segurança da informação, governança, infraestrutura, cloud, DevOps, educação tecnológica e inovação aplicada ao setor público e privado.",
+      footerSummary: "Tecnologia, governança e inovação responsável a serviço de pessoas, instituições e transformação pública.",
       location: "Brasil",
     },
     hero: {
@@ -273,6 +274,7 @@ export const content = {
       title: "Technology leadership, governance, and digital modernization.",
       summary:
         "An institutional platform presenting an executive trajectory in ICT operations, information security, governance, infrastructure, cloud, DevOps, technology education, and innovation for public and private sector modernization.",
+      footerSummary: "Technology, governance and responsible innovation serving people, institutions and public transformation.",
       location: "Brazil",
     },
     hero: {
