@@ -1,8 +1,5 @@
 import { useState } from "react";
-import { submitProposalSuggestion } from "../services/proposalEngagementService.js";
-
-const emailAddress = "renan.gagliano@gmail.com";
-const emailSubject = "Sugestão sobre proposta pública";
+import { submitSuggestion } from "../services/proposalEngagementService.js";
 
 export default function SuggestionForm({ labels, proposal, onClose }) {
   const [form, setForm] = useState({ name: "", email: "", suggestion: "" });
@@ -13,40 +10,20 @@ export default function SuggestionForm({ labels, proposal, onClose }) {
     setForm((current) => ({ ...current, [field]: value }));
   };
 
-  const openMailFallback = () => {
-    const body = [
-      `Proposta: ${proposal.title}`,
-      `Nome: ${form.name}`,
-      `E-mail: ${form.email}`,
-      "",
-      "Sugestão:",
-      form.suggestion,
-    ].join("\n");
-
-    window.location.href = `mailto:${emailAddress}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(body)}`;
-  };
-
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
 
-    const result = await submitProposalSuggestion({
-      proposalId: proposal.id,
-      name: form.name,
-      email: form.email,
-      suggestion: form.suggestion,
-    });
-
+    const result = await submitSuggestion(proposal.id, form);
     setIsSubmitting(false);
 
-    if (result.inserted) {
+    if (result.status === "success") {
       setStatus(labels.suggestionSuccess);
       setForm({ name: "", email: "", suggestion: "" });
       return;
     }
 
-    openMailFallback();
-    setStatus(labels.suggestionFallback);
+    setStatus(labels.suggestionError);
   };
 
   return (
