@@ -11,7 +11,7 @@ export default function Footer() {
       <div className="container-pad grid gap-8 md:grid-cols-[1.3fr_1fr] md:items-start">
         <div>
           <p className="font-display text-xl font-extrabold">{t.identity.name}</p>
-          <p className="mt-3 max-w-2xl leading-7 muted">{t.identity.summary}</p>
+          <p className="mt-3 max-w-2xl leading-7 muted">{t.identity.footerSummary}</p>
           <div className="mt-5 flex flex-wrap gap-2">
             {socials.map((social) => (
               <a
