@@ -1,6 +1,6 @@
 # Supabase Setup
 
-Use only the Supabase publishable/anon key in this Vite app. Never use or expose a service role or secret key.
+Use only the Supabase public anon key in this Vite app. Never use or expose a service role or secret key.
 
 ## Required Tables and Policies
 
@@ -60,3 +60,20 @@ Create:
 - `VITE_SUPABASE_ANON_KEY`
 
 The deploy workflow injects these variables into the Vite build step.
+
+## 401 Unauthorized Troubleshooting
+
+The browser console intentionally logs only whether Supabase configuration exists, never the values:
+
+```text
+Supabase config { hasUrl: true, hasKey: true }
+```
+
+If `hasUrl` and `hasKey` are both `true` but Supabase still returns `401 Unauthorized`, replace `VITE_SUPABASE_ANON_KEY` with the project's Legacy anon public key from Supabase. Do not use the service role key or any secret key.
+
+Supabase JS sends the configured anon key through its default client behavior as both:
+
+- `apikey`
+- `Authorization: Bearer <anon key>`
+
+After updating the GitHub variable, rerun the GitHub Pages deployment so Vite rebuilds the production bundle with the corrected public key.
