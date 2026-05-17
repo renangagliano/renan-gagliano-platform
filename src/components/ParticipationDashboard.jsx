@@ -18,6 +18,8 @@ export default function ParticipationDashboard({ labels, proposals, status = "re
 
   const hasVotes = totals.likes + totals.dislikes > 0;
   const isConfigured = status === "ready" || status === "loading";
+  const statusTitle = status === "error" ? labels.dashboardErrorTitle : labels.dashboardConfigurationTitle;
+  const statusText = status === "error" ? labels.dashboardErrorText : labels.dashboardConfigurationText;
 
   const stats = isConfigured
     ? [
@@ -27,16 +29,16 @@ export default function ParticipationDashboard({ labels, proposals, status = "re
         { label: labels.engagementStatus, value: hasVotes ? labels.active : labels.noVotes },
       ]
     : [
-        { label: labels.totalLikes, value: labels.dashboardConfigurationTitle },
-        { label: labels.totalDislikes, value: labels.dashboardConfigurationText },
-        { label: labels.mostSupported, value: labels.dashboardConfigurationTitle },
-        { label: labels.engagementStatus, value: labels.dashboardConfigurationText },
+        { label: labels.totalLikes, value: statusTitle },
+        { label: labels.totalDislikes, value: statusText },
+        { label: labels.mostSupported, value: statusTitle },
+        { label: labels.engagementStatus, value: statusText },
       ];
 
   return (
     <section className="mt-10 rounded-lg border border-white/10 bg-white/[0.05] p-5">
       <h2 className="font-display text-2xl font-extrabold text-white">{labels.dashboardTitle}</h2>
-      {!isConfigured && <p className="mt-3 leading-7 muted">{labels.dashboardConfigurationText}</p>}
+      {!isConfigured && <p className="mt-3 leading-7 muted">{statusText}</p>}
       <div className="mt-5 grid gap-3 md:grid-cols-4">
         {stats.map((stat) => (
           <div key={stat.label} className="rounded-md border border-white/10 bg-white/[0.04] p-4">
