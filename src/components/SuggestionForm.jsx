@@ -1,17 +1,19 @@
 import { useState } from "react";
+import { submitProposalSuggestion } from "../services/proposalEngagementService.js";
 
 const emailAddress = "renan.gagliano@gmail.com";
 const emailSubject = "Sugestão sobre proposta pública";
 
 export default function SuggestionForm({ labels, proposal, onClose }) {
   const [form, setForm] = useState({ name: "", email: "", suggestion: "" });
+  const [status, setStatus] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const updateField = (field, value) => {
     setForm((current) => ({ ...current, [field]: value }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+  const openMailFallback = () => {
     const body = [
       `Proposta: ${proposal.title}`,
       `Nome: ${form.name}`,
@@ -22,7 +24,29 @@ export default function SuggestionForm({ labels, proposal, onClose }) {
     ].join("\n");
 
     window.location.href = `mailto:${emailAddress}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(body)}`;
-    onClose();
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setIsSubmitting(true);
+
+    const result = await submitProposalSuggestion({
+      proposalId: proposal.id,
+      name: form.name,
+      email: form.email,
+      suggestion: form.suggestion,
+    });
+
+    setIsSubmitting(false);
+
+    if (result.inserted) {
+      setStatus(labels.suggestionSuccess);
+      setForm({ name: "", email: "", suggestion: "" });
+      return;
+    }
+
+    openMailFallback();
+    setStatus(labels.suggestionFallback);
   };
 
   return (
@@ -68,14 +92,16 @@ export default function SuggestionForm({ labels, proposal, onClose }) {
               className="focus-ring resize-none rounded-md border border-white/10 bg-white/[0.06] px-4 py-3 text-white"
             />
           </label>
+          <p className="text-sm leading-6 muted">{labels.privacyNote}</p>
+          {status && <p className="rounded-md border border-white/10 bg-white/[0.05] px-4 py-3 text-sm font-semibold text-civic">{status}</p>}
         </div>
 
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button type="button" onClick={onClose} className="focus-ring rounded-md border border-white/10 px-4 py-3 text-sm font-bold text-white/74">
             {labels.cancel}
           </button>
-          <button type="submit" className="focus-ring rounded-md bg-civic px-4 py-3 text-sm font-bold text-graphite">
-            {labels.sendByEmail}
+          <button type="submit" disabled={isSubmitting} className="focus-ring rounded-md bg-civic px-4 py-3 text-sm font-bold text-graphite disabled:opacity-60">
+            {isSubmitting ? labels.submitting : labels.sendSuggestion}
           </button>
         </div>
       </form>

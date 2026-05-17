@@ -23,7 +23,7 @@ function Section({ title, children }) {
   );
 }
 
-export default function ProposalModal({ counts, labels, onClose, onVote, proposal, vote }) {
+export default function ProposalModal({ counts, labels, onClose, onVote, proposal, vote, voteMessage }) {
   const [suggestionOpen, setSuggestionOpen] = useState(false);
 
   return (
@@ -44,7 +44,7 @@ export default function ProposalModal({ counts, labels, onClose, onVote, proposa
           </div>
 
           <div className="mt-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <VotingButtons counts={counts} labels={labels} onVote={onVote} vote={vote} />
+            <VotingButtons counts={counts} labels={labels} onVote={onVote} vote={vote} voteMessage={voteMessage} />
             <button
               type="button"
               onClick={() => setSuggestionOpen(true)}

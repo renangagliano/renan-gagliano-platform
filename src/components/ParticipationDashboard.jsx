@@ -1,4 +1,4 @@
-export default function ParticipationDashboard({ labels, proposals, votes }) {
+export default function ParticipationDashboard({ available = true, labels, proposals, votes }) {
   const totals = proposals.reduce(
     (current, proposal) => {
       const counts = votes[proposal.id] || { likes: 0, dislikes: 0 };
@@ -18,12 +18,19 @@ export default function ParticipationDashboard({ labels, proposals, votes }) {
 
   const hasVotes = totals.likes + totals.dislikes > 0;
 
-  const stats = [
-    { label: labels.totalLikes, value: totals.likes },
-    { label: labels.totalDislikes, value: totals.dislikes },
-    { label: labels.mostSupported, value: hasVotes ? mostSupported.title : labels.noVotes },
-    { label: labels.engagementStatus, value: hasVotes ? labels.active : labels.noVotes },
-  ];
+  const stats = available
+    ? [
+        { label: labels.totalLikes, value: totals.likes },
+        { label: labels.totalDislikes, value: totals.dislikes },
+        { label: labels.mostSupported, value: hasVotes ? mostSupported.title : labels.noVotes },
+        { label: labels.engagementStatus, value: hasVotes ? labels.active : labels.noVotes },
+      ]
+    : [
+        { label: labels.totalLikes, value: labels.unavailable },
+        { label: labels.totalDislikes, value: labels.unavailable },
+        { label: labels.mostSupported, value: labels.unavailable },
+        { label: labels.engagementStatus, value: labels.unavailable },
+      ];
 
   return (
     <section className="mt-10 rounded-lg border border-white/10 bg-white/[0.05] p-5">
