@@ -23,6 +23,29 @@ const setStoredJson = (key, value) => {
   localStorage.setItem(key, JSON.stringify(value));
 };
 
+const formatSupabaseError = (error) => ({
+  message: error?.message || "Unknown Supabase error",
+  code: error?.code || null,
+  details: error?.details || null,
+  hint: error?.hint || null,
+});
+
+const hasReadySupabaseClient = () => Boolean(hasSupabaseConfig && supabase);
+
+async function testVotesTableSelect() {
+  if (!hasReadySupabaseClient()) {
+    return { error: { message: "Supabase client is not configured." } };
+  }
+
+  const { error } = await supabase.from(votesTable).select("id", { count: "exact", head: true }).limit(1);
+
+  if (error) {
+    console.info("Supabase public proposal votes select failed.", formatSupabaseError(error));
+  }
+
+  return { error };
+}
+
 export function getVoterId() {
   const storedVoterId = localStorage.getItem(voterIdKey);
   if (storedVoterId) return storedVoterId;
@@ -48,15 +71,21 @@ export function getLocalVotes() {
 export async function getProposalTotals(proposalIds) {
   const totals = emptyTotals(proposalIds);
 
-  if (!hasSupabaseConfig) {
+  if (!hasReadySupabaseClient()) {
+    console.info("Supabase public proposal totals skipped because client configuration is unavailable.");
     return { status: "configuration", totals };
+  }
+
+  const diagnostic = await testVotesTableSelect();
+  if (diagnostic.error) {
+    return { status: "error", totals, error: formatSupabaseError(diagnostic.error) };
   }
 
   const { data, error } = await supabase.from(votesTable).select("proposal_id, vote_type").in("proposal_id", proposalIds);
 
   if (error) {
-    console.info("Unable to load public proposal vote totals from Supabase.", error.message);
-    return { status: "error", totals };
+    console.info("Unable to load public proposal vote totals from Supabase.", formatSupabaseError(error));
+    return { status: "error", totals, error: formatSupabaseError(error) };
   }
 
   data.forEach((vote) => {
@@ -99,8 +128,13 @@ export async function voteProposal(proposalId, voteType) {
     return { status: "already-voted" };
   }
 
-  if (!hasSupabaseConfig) {
+  if (!hasReadySupabaseClient()) {
     return { status: "configuration" };
+  }
+
+  const diagnostic = await testVotesTableSelect();
+  if (diagnostic.error) {
+    return { status: "error", error: formatSupabaseError(diagnostic.error) };
   }
 
   const voterId = getVoterId();
@@ -112,8 +146,8 @@ export async function voteProposal(proposalId, voteType) {
     .maybeSingle();
 
   if (lookupError) {
-    console.info("Unable to verify existing public proposal vote in Supabase.", lookupError.message);
-    return { status: "error" };
+    console.info("Unable to verify existing public proposal vote in Supabase.", formatSupabaseError(lookupError));
+    return { status: "error", error: formatSupabaseError(lookupError) };
   }
 
   if (existingVote) {
@@ -133,8 +167,8 @@ export async function voteProposal(proposalId, voteType) {
       return { status: "already-voted", voteType };
     }
 
-    console.info("Unable to submit public proposal vote to Supabase.", error.message);
-    return { status: "error" };
+    console.info("Unable to submit public proposal vote to Supabase.", formatSupabaseError(error));
+    return { status: "error", error: formatSupabaseError(error) };
   }
 
   setLocalVote(proposalId, voteType);
@@ -142,7 +176,7 @@ export async function voteProposal(proposalId, voteType) {
 }
 
 export async function submitSuggestion(proposalId, formData) {
-  if (!hasSupabaseConfig) {
+  if (!hasReadySupabaseClient()) {
     return { status: "configuration" };
   }
 
@@ -154,8 +188,8 @@ export async function submitSuggestion(proposalId, formData) {
   });
 
   if (error) {
-    console.info("Unable to submit public proposal suggestion to Supabase.", error.message);
-    return { status: "error" };
+    console.info("Unable to submit public proposal suggestion to Supabase.", formatSupabaseError(error));
+    return { status: "error", error: formatSupabaseError(error) };
   }
 
   return { status: "success" };
