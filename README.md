@@ -30,7 +30,7 @@ VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 ```
 
-Use only the Supabase publishable/anon key. Never use a service role or secret key in this frontend project.
+Use only the Supabase public anon key. Never use a service role or secret key in this frontend project. If production logs `401 Unauthorized` while `hasUrl` and `hasKey` are both `true`, use the Supabase project's Legacy anon public key for `VITE_SUPABASE_ANON_KEY`.
 
 For GitHub Pages deployment, add repository variables in:
 
@@ -43,7 +43,7 @@ Create:
 
 The deploy workflow passes these variables to the Vite build step.
 
-See `SUPABASE_SETUP.md` for the required SQL tables and RLS policies.
+See `SUPABASE_SETUP.md` for the required SQL tables, RLS policies, and 401 troubleshooting notes.
 
 ## Production Build
 
