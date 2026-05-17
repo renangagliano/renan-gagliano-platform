@@ -10,6 +10,7 @@ Modern institutional platform for Renan Gagliano, built with React, Vite, Tailwi
 - SEO metadata and social preview image
 - Optimized institutional technology hero asset
 - GitHub Pages workflow and SPA `404.html` fallback
+- Supabase-backed global engagement for Public Proposals
 
 ## Local Development
 
@@ -19,6 +20,30 @@ npm run dev
 ```
 
 Open `http://127.0.0.1:5173`.
+
+## Supabase Environment
+
+Copy `.env.example` to `.env` for local development and configure:
+
+```bash
+VITE_SUPABASE_URL=
+VITE_SUPABASE_ANON_KEY=
+```
+
+Use only the Supabase publishable/anon key. Never use a service role or secret key in this frontend project.
+
+For GitHub Pages deployment, add repository variables in:
+
+Settings -> Secrets and variables -> Actions -> Variables
+
+Create:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+
+The deploy workflow passes these variables to the Vite build step.
+
+See `SUPABASE_SETUP.md` for the required SQL tables and RLS policies.
 
 ## Production Build
 
