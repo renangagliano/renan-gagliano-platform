@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://renangagliano.github.io/renan-gagliano-platform/",
+  "homepage": "https://renangagliano.com.br/",
   "scripts": {
     "dev": "vite --configLoader runner --host 127.0.0.1",
     "build": "vite build --configLoader runner && node scripts/gh-pages-404.js",
