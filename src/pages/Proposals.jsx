@@ -6,45 +6,31 @@ import SectionHeader from "../components/SectionHeader.jsx";
 import Seo from "../components/Seo.jsx";
 import { proposalLabels, proposalsByLanguage } from "../data/proposals.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
-import { fetchProposalVoteTotals, submitProposalVote } from "../services/proposalEngagementService.js";
-
-const userVotesKey = "renan-public-proposal-user-votes";
-const voterIdKey = "renan-public-proposal-voter-id";
-
-const getStoredJson = (key, fallback) => {
-  try {
-    return JSON.parse(localStorage.getItem(key)) || fallback;
-  } catch {
-    return fallback;
-  }
-};
-
-const getVoterId = () => {
-  const storedVoterId = localStorage.getItem(voterIdKey);
-  if (storedVoterId) return storedVoterId;
-
-  const voterId = crypto.randomUUID ? crypto.randomUUID() : `voter-${Date.now()}-${Math.random().toString(16).slice(2)}`;
-  localStorage.setItem(voterIdKey, voterId);
-  return voterId;
-};
+import { getLocalVotes, getProposalTotals, voteProposal } from "../services/proposalEngagementService.js";
 
 const emptyTotals = (proposals) => proposals.reduce((totals, proposal) => ({ ...totals, [proposal.id]: { likes: 0, dislikes: 0 } }), {});
 
 const engagementLabels = {
   pt: {
     alreadyVoted: "Você já registrou sua opinião nesta proposta.",
-    unavailable: "Indisponível",
+    dashboardConfigurationTitle: "Painel em configuração",
+    dashboardConfigurationText: "Em breve os votos públicos estarão disponíveis.",
+    dashboardErrorTitle: "Painel em configuração",
+    dashboardErrorText: "Em breve os votos públicos estarão disponíveis.",
     privacyNote: "Seus dados serão utilizados apenas para retorno sobre esta sugestão.",
     suggestionSuccess: "Sugestão registrada com sucesso. Obrigado pela contribuição.",
-    suggestionFallback: "Não foi possível registrar no banco agora. Abrimos seu aplicativo de e-mail como alternativa.",
+    suggestionError: "Não foi possível registrar sua sugestão agora. Tente novamente em alguns instantes.",
     submitting: "Enviando...",
   },
   en: {
     alreadyVoted: "You have already submitted your opinion for this proposal.",
-    unavailable: "Unavailable",
+    dashboardConfigurationTitle: "Dashboard under configuration",
+    dashboardConfigurationText: "Public votes will be available soon.",
+    dashboardErrorTitle: "Dashboard under configuration",
+    dashboardErrorText: "Public votes will be available soon.",
     privacyNote: "Your data will only be used to follow up on this suggestion.",
     suggestionSuccess: "Suggestion submitted successfully. Thank you for contributing.",
-    suggestionFallback: "We could not save it to the database right now. Your email app was opened as a fallback.",
+    suggestionError: "We could not submit your suggestion right now. Please try again in a moment.",
     submitting: "Sending...",
   },
 };
@@ -55,27 +41,19 @@ export default function Proposals() {
   const labels = useMemo(() => ({ ...proposalLabels[language], ...engagementLabels[language] }), [language]);
   const [activeProposal, setActiveProposal] = useState(null);
   const [votes, setVotes] = useState(() => emptyTotals(proposals));
-  const [userVotes, setUserVotes] = useState(() => getStoredJson(userVotesKey, {}));
-  const [voterId, setVoterId] = useState("");
-  const [engagementAvailable, setEngagementAvailable] = useState(true);
+  const [userVotes, setUserVotes] = useState(() => getLocalVotes());
+  const [engagementStatus, setEngagementStatus] = useState("loading");
   const [voteMessage, setVoteMessage] = useState("");
-
-  useEffect(() => {
-    setVoterId(getVoterId());
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(userVotesKey, JSON.stringify(userVotes));
-  }, [userVotes]);
 
   useEffect(() => {
     let isActive = true;
 
     const loadTotals = async () => {
-      const result = await fetchProposalVoteTotals(proposals.map((proposal) => proposal.id));
+      const result = await getProposalTotals(proposals.map((proposal) => proposal.id));
       if (!isActive) return;
       setVotes(result.totals);
-      setEngagementAvailable(result.available);
+      setEngagementStatus(result.status);
+      setUserVotes(getLocalVotes());
     };
 
     loadTotals();
@@ -88,9 +66,10 @@ export default function Proposals() {
   const getCounts = (proposalId) => votes[proposalId] || { likes: 0, dislikes: 0 };
 
   const refreshTotals = async () => {
-    const result = await fetchProposalVoteTotals(proposals.map((proposal) => proposal.id));
+    const result = await getProposalTotals(proposals.map((proposal) => proposal.id));
     setVotes(result.totals);
-    setEngagementAvailable(result.available);
+    setEngagementStatus(result.status);
+    setUserVotes(getLocalVotes());
   };
 
   const handleVote = async (proposalId, type) => {
@@ -99,20 +78,23 @@ export default function Proposals() {
       return;
     }
 
-    const result = await submitProposalVote({ proposalId, voteType: type, voterId });
+    const result = await voteProposal(proposalId, type);
 
-    if (result.alreadyVoted) {
-      setUserVotes((currentVotes) => ({ ...currentVotes, [proposalId]: result.voteType || type }));
+    if (result.status === "already-voted") {
+      setUserVotes(getLocalVotes());
       setVoteMessage(labels.alreadyVoted);
       await refreshTotals();
       return;
     }
 
-    if (result.inserted) {
-      setUserVotes((currentVotes) => ({ ...currentVotes, [proposalId]: type }));
+    if (result.status === "success") {
+      setUserVotes(getLocalVotes());
       setVoteMessage("");
       await refreshTotals();
+      return;
     }
+
+    setEngagementStatus(result.status);
   };
 
   return (
@@ -142,7 +124,7 @@ export default function Proposals() {
               </button>
             ))}
           </div>
-          <ParticipationDashboard labels={labels} proposals={proposals} votes={votes} available={engagementAvailable} />
+          <ParticipationDashboard labels={labels} proposals={proposals} votes={votes} status={engagementStatus} />
         </div>
       </section>
       {activeProposal && (
