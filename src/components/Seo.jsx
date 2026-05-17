@@ -9,7 +9,7 @@ export default function Seo({ title, description }) {
   const location = useLocation();
 
   useEffect(() => {
-    document.title = `${title} | Renan Gagliano`;
+    document.title = title.includes("Renan Gagliano") ? title : `${title} | Renan Gagliano`;
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute("content", description);
     const keywords = document.querySelector('meta[name="keywords"]');
